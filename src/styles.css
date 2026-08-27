@@ -59,6 +59,22 @@ textarea {
   color: #0f0f0f;
 }
 
+#calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+  padding: 10px;
+}
+
+#calendar button {
+  height: 40px;
+}
+
+.has-journal {
+  background: green;
+  color: white;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     color: #f6f6f6;
