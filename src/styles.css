@@ -37,7 +37,7 @@ body {
   flex-direction: column;
 }
 
-#date{
+#date {
   padding-inline: 20px;
 }
 
@@ -66,13 +66,27 @@ textarea {
   padding: 10px;
 }
 
-#calendar button {
-  height: 40px;
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  gap: 10rem;
+  width:100%;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+}
+
+.calendar-grid button {
+  height: 30px;
 }
 
 .has-journal {
   background: green;
-  color: white;
 }
 
 @media (prefers-color-scheme: dark) {

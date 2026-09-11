@@ -2,6 +2,10 @@ const { invoke } = window.__TAURI__.core; // imports the invoke function from th
 const editor = document.getElementById("editor");
 const history = document.getElementById("history");
 const dateLabel = document.getElementById("date");
+const header = document.getElementById("header");
+let currentYear = new Date().getFullYear();
+let currentMonth = new Date().getMonth();
+let allJournalDates = [];
 
 let currentDate;
 
@@ -27,7 +31,12 @@ async function saveJournal() {
 
 async function refreshHistory() {
   const journals = await invoke("list_journals");
-  const journalDates = journals.map(file => file.replace(".txt", ""));
+  const journalDates = journals.map(file =>
+    file.replace(".txt", "")
+  );
+
+  allJournalDates = journalDates;
+
   history.innerHTML = "";
 
   journals.forEach((file) => {
@@ -44,7 +53,11 @@ async function refreshHistory() {
   });
 
   const now = new Date();
-  renderCalendar(now.getFullYear(), now.getMonth(), journalDates);
+  renderCalendar(
+    currentYear,
+    currentMonth,
+    allJournalDates
+  );
 }
 
 let saveTimer;
@@ -65,12 +78,83 @@ window.addEventListener("DOMContentLoaded", async () => {
 
 function renderCalendar(year, month, journalDates) {
   const calendar = document.getElementById("calendar");
+  const header = document.getElementById("header");
 
-  calendar.innerHTML = "";
+  const monthNames = [
+    "January", "February", "March", "April",
+    "May", "June", "July", "August",
+    "September", "October", "November", "December"
+  ];
+
+  if (!title) {
+    title = document.createElement("h3");
+    title.id = "calendar-title";
+    header.appendChild(title);
+  }
+
+  // Update title
+  title.textContent = `${monthNames[month]} ${year}`;
+
+
+  // Remove old grid if it exists
+  const oldGrid = document.querySelector(".calendar-grid");
+  if (oldGrid) {
+    oldGrid.remove();
+  }
+
+  // Create buttons only once
+  if (!document.getElementById("prev-month")) {
+    const prevBtn = document.createElement("button");
+    prevBtn.id = "prev-month";
+    prevBtn.textContent = "◀";
+
+    prevBtn.onclick = () => {
+      currentMonth--;
+
+      if (currentMonth < 0) {
+        currentMonth = 11;
+        currentYear--;
+      }
+
+      renderCalendar(currentYear, currentMonth, allJournalDates);
+    };
+
+    header.prepend(prevBtn);
+  }
+
+  if (!document.getElementById("next-month")) {
+    const nextBtn = document.createElement("button");
+    nextBtn.id = "next-month";
+    nextBtn.textContent = "▶";
+
+    nextBtn.onclick = () => {
+      currentMonth++;
+
+      if (currentMonth > 11) {
+        currentMonth = 0;
+        currentYear++;
+      }
+
+      renderCalendar(currentYear, currentMonth, allJournalDates);
+    };
+
+    header.appendChild(nextBtn);
+  }
+
+  // Create day grid
+  const grid = document.createElement("div");
+  grid.className = "calendar-grid";
 
   const firstDay = new Date(year, month, 1);
   const lastDay = new Date(year, month + 1, 0);
 
+  // Empty cells before first day
+  for (let i = 0; i < firstDay.getDay(); i++) {
+    const empty = document.createElement("div");
+    grid.appendChild(empty);
+  }
+
+  // Day buttons
   for (let day = 1; day <= lastDay.getDate(); day++) {
     const dateStr =
       `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
@@ -85,6 +169,8 @@ function renderCalendar(year, month, journalDates) {
 
     btn.onclick = () => loadJournal(dateStr);
 
-    calendar.appendChild(btn);
+    grid.appendChild(btn);
   }
+
+  calendar.appendChild(grid);
 }
